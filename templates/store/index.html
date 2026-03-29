@@ -1,0 +1,265 @@
+{% load static %}
+
+<!DOCTYPE html>
+
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NOVA — Modern Store</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="apple-touch-icon" sizes="180x180" href="{% static 'icon/apple-touch-icon.png' %}">
+  <link rel="icon" type="image/png" sizes="32x32" href="{% static 'icon/favicon-32x32.png' %}">
+  <link rel="icon" type="image/png" sizes="16x16" href="{% static 'icon/favicon-16x16.png' %}">
+  <link rel="manifest" href="{% static 'icon/site.webmanifest' %}">
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="logo" onclick="goHome()"><div class="logo-dot"></div>NOVA</div>
+  <div class="srch">
+    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input id="si" type="text" placeholder="Search products… (⌘K)" oninput="onSrch(this.value)" autocomplete="off">
+  </div>
+  <div class="nav-end">
+    <div class="tpill">
+      <button class="topt" id="dark-opt" onclick="setThm('dark')" title="Dark">🌙</button>
+      <button class="topt" id="light-opt" onclick="setThm('light')" title="Light">☀️</button>
+    </div>
+    <button class="cbtn" onclick="goCart()" title="Cart (0 items)">
+      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+      <span class="cbadge" id="cbadge" style="display:none">0</span>
+    </button>
+    <div id="gnav"><button class="nb pri" onclick="openM('am')">Sign In</button></div>
+    <div class="um" id="um" style="display:none">
+      <button class="nb" onclick="togUm()">
+        <span id="unav-av" style="font-family:'Space Mono',monospace;font-size:13px">U</span>
+        <span id="unav-nm">User</span>
+        <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+      <div class="udrop">
+        <div class="di" onclick="goAcc();closeUm()">⚙ Account</div>
+        <div class="di" onclick="goOrders();closeUm()">📦 My Orders</div>
+        <div class="di" onclick="goCart();closeUm()">🛒 Cart</div>
+        <div class="dsep"></div>
+        <div class="di red" onclick="confLogout()">↩ Sign Out</div>
+        <div class="di red" onclick="confDel()">🗑 Delete Account</div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- HOME -->
+<div class="view active" id="v-home">
+  <div class="hero">
+    <div class="kick">✦ New arrivals weekly</div>
+    <h1>Shop the <em>future</em>,<br>delivered <span class="pk">today</span>.</h1>
+    <p>Premium products curated for modern life. Fast shipping, effortless returns.</p>
+    <button class="hcta" onclick="G('pgrid').scrollIntoView({behavior:'smooth'})">Browse Products <span>→</span></button>
+  </div>
+  <div class="cats" id="cats"><span class="pill on" onclick="pickCat('')" data-cat="">All</span></div>
+  <div class="fbar">
+    <div style="display:flex;align-items:center;gap:8px">
+      <span class="ftitle" id="gtitle">All Products</span>
+      <span class="ftag" id="gcnt" style="display:none">0</span>
+    </div>
+    <select class="fsort" onchange="onSort(this.value)">
+      <option value="">Default</option>
+      <option value="pa">Price: Low → High</option>
+      <option value="pd">Price: High → Low</option>
+      <option value="na">Name A → Z</option>
+    </select>
+  </div>
+  <div class="pgrid" id="pgrid"></div>
+</div>
+
+<!-- CART -->
+<div class="view" id="v-cart">
+  <div class="cpage">
+    <div class="cptitle">Your Cart</div>
+    <div class="cpsub" id="csub">—</div>
+    <div class="clay">
+      <div id="citems"></div>
+      <div class="summ">
+        <div class="smtitle">Order Summary</div>
+        <div id="slines"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0 0">
+          <span style="font-weight:700;font-size:15px">Total</span>
+          <span class="stot" id="stot">$0.00</span>
+        </div>
+        <div class="bpill" id="bpill" style="display:none">
+          <span style="color:var(--t2)">Your Balance</span>
+          <strong id="bdisp">$0.00</strong>
+        </div>
+        <button class="btn ba bfull blg" style="margin-top:14px" onclick="doChk()" id="chkbtn">⚡ Checkout Now</button>
+        <button class="btn bg bfull bsm" style="margin-top:8px" onclick="goHome()">← Keep Shopping</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ACCOUNT -->
+<div class="view" id="v-acc">
+  <div class="apage">
+    <div class="ahead">
+      <div class="aav" id="aav">U</div>
+      <div>
+        <div class="aname" id="aname">User</div>
+        <div class="aemail" id="aemail">—</div>
+        <div class="asince" id="asince">Member since —</div>
+      </div>
+    </div>
+    <div class="bcard">
+      <div class="blbl">💰 Available Balance</div>
+      <div class="bamt" id="abamt">$0.00</div>
+      <div class="turow">
+        <input id="tuamt" type="number" class="tuinp" placeholder="Add funds (1–10,000)…" min="1" max="10000">
+        <button class="btn" style="background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.3);flex-shrink:0;padding:10px 16px" onclick="doTopup()">+ Top Up</button>
+      </div>
+    </div>
+    <div class="acard">
+      <div class="actitle">📦 Quick Actions</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <button class="btn bg" onclick="goOrders()">View My Orders</button>
+        <button class="btn bg" onclick="goHome()">Continue Shopping</button>
+      </div>
+    </div>
+    <div class="acard">
+      <div class="actitle" style="color:var(--dan)">⚠ Danger Zone</div>
+      <p style="font-size:14px;color:var(--t2);margin-bottom:14px">Deleting your account is permanent and cannot be undone.</p>
+      <button class="btn bd bsm" onclick="confDel()">Delete My Account</button>
+    </div>
+  </div>
+</div>
+
+<!-- ORDERS -->
+<div class="view" id="v-orders">
+  <div class="opage">
+    <div style="font-size:26px;font-weight:800;margin-bottom:24px">My Orders</div>
+    <div id="olist"></div>
+  </div>
+</div>
+
+<!-- MODAL: AUTH -->
+<div class="ov" id="am" onclick="bgC(event,'am')">
+  <div class="modal">
+    <div class="mh"><span class="mt">Welcome to NOVA</span><button class="mx" onclick="closeM('am')">✕</button></div>
+    <div class="mb">
+      <div class="tabs">
+        <button class="tab on" onclick="authTab('l')">Sign In</button>
+        <button class="tab" onclick="authTab('r')">Create Account</button>
+      </div>
+      <div id="lpane">
+        <div class="fg"><label class="fl">Username</label><input class="fi" id="lu" placeholder="your_username" autocomplete="username"></div>
+        <div class="fg"><label class="fl">Password</label><input class="fi" id="lp" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
+        <div class="fe" id="le"></div>
+        <button class="btn ba bfull blg" style="margin-top:12px" onclick="doLogin()">Sign In →</button>
+        <div class="hint">Demo: <strong>demo</strong> / <strong>demo123</strong> · Balance: <strong>$1,500</strong></div>
+      </div>
+      <div id="rpane" style="display:none">
+        <div class="fr">
+          <div class="fg"><label class="fl">First Name</label><input class="fi" id="rfn" placeholder="Jane"></div>
+          <div class="fg"><label class="fl">Last Name</label><input class="fi" id="rln" placeholder="Doe"></div>
+        </div>
+        <div class="fg"><label class="fl">Username</label><input class="fi" id="ru" placeholder="jane_doe" autocomplete="username"></div>
+        <div class="fg"><label class="fl">Email</label><input class="fi" id="re" type="email" placeholder="jane@example.com"></div>
+        <div class="fg"><label class="fl">Password</label><input class="fi" id="rp" type="password" placeholder="min. 6 characters" autocomplete="new-password"></div>
+        <div class="fg"><label class="fl">Confirm Password</label><input class="fi" id="rp2" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doReg()"></div>
+        <div class="fe" id="re2"></div>
+        <button class="btn ba bfull blg" style="margin-top:12px" onclick="doReg()">Create Account →</button>
+        <div class="hint">New accounts start with <strong>$500.00</strong> demo balance.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: PRODUCT -->
+<div class="ov" id="pm" onclick="bgC(event,'pm')">
+  <div class="modal w">
+    <div class="mh"><span class="mt" id="pm-nm">Product</span><button class="mx" onclick="closeM('pm')">✕</button></div>
+    <div class="mb">
+
+      <!-- ── GALLERY ── -->
+      <div style="margin-bottom:18px">
+        <!-- Main image frame -->
+        <div style="position:relative;border-radius:16px;overflow:hidden;background:#fff;aspect-ratio:4/3">
+          <img id="pm-img"
+               style="width:100%;height:100%;object-fit:contain;display:block;transition:opacity .2s ease"
+               src="" alt="">
+          <!-- placeholder shown when no image -->
+          <div id="pm-ph" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:64px;color:var(--t3)">📦</div>
+          <!-- left arrow -->
+          <button id="arr-l" onclick="galNav(-1)"
+            style="position:absolute;left:10px;top:50%;transform:translateY(-50%);
+                   width:40px;height:40px;border-radius:50%;
+                   background:rgba(0,0,0,.55);backdrop-filter:blur(4px);
+                   color:#fff;border:none;font-size:22px;font-weight:700;
+                   cursor:pointer;display:none;align-items:center;justify-content:center;
+                   z-index:2;transition:background .2s ease;line-height:1">&#8249;</button>
+          <!-- right arrow -->
+          <button id="arr-r" onclick="galNav(+1)"
+            style="position:absolute;right:10px;top:50%;transform:translateY(-50%);
+                   width:40px;height:40px;border-radius:50%;
+                   background:rgba(0,0,0,.55);backdrop-filter:blur(4px);
+                   color:#fff;border:none;font-size:22px;font-weight:700;
+                   cursor:pointer;display:none;align-items:center;justify-content:center;
+                   z-index:2;transition:background .2s ease;line-height:1">&#8250;</button>
+          <!-- image counter  e.g. 2 / 5 -->
+          <div id="gal-cnt"
+            style="position:absolute;bottom:10px;right:12px;
+                   background:rgba(0,0,0,.55);backdrop-filter:blur(4px);
+                   color:#fff;font-size:12px;font-weight:700;
+                   padding:3px 10px;border-radius:50px;display:none">1 / 1</div>
+        </div>
+        <!-- Thumbnail strip (hidden when only 1 image) -->
+        <div id="pm-thumbs"
+             style="display:flex;gap:8px;margin-top:10px;overflow-x:auto;
+                    padding-bottom:6px;scrollbar-width:none"></div>
+      </div>
+      <!-- ── END GALLERY ── -->
+
+      <div class="di-meta">
+        <span class="di-price" id="pm-pr">$0</span>
+        <span class="di-cat" id="pm-cat">Category</span>
+      </div>
+      <p class="di-desc" id="pm-desc"></p>
+      <p class="di-stk" id="pm-stk"></p>
+      <div class="qrow">
+        <span class="qlbl">Quantity:</span>
+        <div class="qbox">
+          <button class="qb" onclick="dq(-1)">−</button>
+          <span class="qv" id="pm-qty">1</span>
+          <button class="qb" onclick="dq(+1)">+</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn ba blg" style="flex:1" onclick="addFM()" id="pm-add">Add to Cart 🛒</button>
+        <button class="btn bg" onclick="closeM('pm')">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: CONFIRM -->
+<div class="ov" id="cf" onclick="bgC(event,'cf')">
+  <div class="modal" style="max-width:360px">
+    <div class="mh"><span class="mt" id="cf-t">Confirm</span><button class="mx" onclick="closeM('cf')">✕</button></div>
+    <div class="mb">
+      <div class="conf-msg" id="cf-m"></div>
+      <div class="cact">
+        <button class="btn bd bfull" id="cf-ok">Confirm</button>
+        <button class="btn bg bfull" onclick="closeM('cf')">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="tw" id="tw"></div>
+
+<script src="{% static 'js/script.js' %}"></script>
+
+</body>
+</html>
